@@ -1,10 +1,10 @@
-package util;
+package org.project.util;
 
-import entity.Employee;
+import org.project.entity.Employee;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.sql.*;
+import org.project.Main;
 
 public class DataBase {
 
@@ -14,11 +14,27 @@ public class DataBase {
 
     public DataBase(){
         try {
-
-            connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/empleados", "root", "root");
-        }catch (SQLException e){
+            connection = DriverManager.getConnection("jdbc:h2:~/employees", "sa", "");
+            crearTablas();
+        }catch (SQLException | IOException e){
             e.printStackTrace();
         }
+    }
+
+    private void crearTablas() throws IOException, SQLException {
+
+        InputStream inputStream = Main.class.getResourceAsStream("/crear_tablas.sql");
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        StringBuilder sqlBuilder = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            sqlBuilder.append(line);
+            sqlBuilder.append("\n");
+        }
+        reader.close();
+
+       preparedStatement = connection.prepareStatement(sqlBuilder.toString());
+       preparedStatement.executeUpdate();
     }
 
     public void insert(Employee employee) throws Exception{
@@ -40,48 +56,44 @@ public class DataBase {
     public ResultSet searchInformation(String identification) throws SQLException {
         String query = "SELECT * FROM employee WHERE id = ?";
         preparedStatement = connection.prepareStatement(query);
-        preparedStatement.setString(1, String.valueOf(Integer.parseInt(identification)));
+        preparedStatement.setString(1, identification);
         return preparedStatement.executeQuery();
 
     }
 
+    private FileInputStream convertImageToInputStream(File image){
+        try {
+            return new FileInputStream(image);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public boolean updateInformation(Employee employee) throws SQLException {
-        FileInputStream fis = null;
-        String query = "update employee set" +
-                " name=?," +
-                "last_name=?," +
-                "email=?," +
-                "direction=?," +
-                "phone=?" +
+
+        FileInputStream fis;
+        String query = "update EMPLOYEE set" +
+                " name='"+employee.getName()+"'," +
+                "last_name='"+employee.getLastName()+"'," +
+                "email='"+employee.getEmail()+"'," +
+                "direction='"+employee.getEmail()+"'," +
+                "phone='"+employee.getPhone()+"'," +
                 "image=? where id ="+employee.getId();
 
         preparedStatement = connection.prepareStatement(query);
 
-        preparedStatement.setString(1, employee.getName());
-        preparedStatement.setString(2, employee.getLastName());
-        preparedStatement.setString(3, employee.getEmail());
-        preparedStatement.setString(4, employee.getDirection());
-        preparedStatement.setString(5, employee.getPhone());
-
         if (employee.getImage() !=null) {
-            try {
-                fis = new FileInputStream(employee.getImage());
-            } catch (FileNotFoundException e) {
-                throw new RuntimeException(e);
-            }
-            preparedStatement.setBinaryStream(6, fis, (int) employee.getImage().length());
-
+            fis = convertImageToInputStream(employee.getImage());
+            preparedStatement.setBinaryStream(1, fis, (int) employee.getImage().length());
         }
         else {
-            preparedStatement.setBlob(6,employee.getUpdateImage());
+            preparedStatement.setBlob(1,employee.getUpdateImage());
         }
 
-        preparedStatement.executeUpdate();
-
         try {
-            preparedStatement = connection.prepareStatement(query);
-            preparedStatement.executeUpdate();
+             preparedStatement.executeUpdate();
         }catch (SQLException e){
+            e.printStackTrace();
             return false;
         }
 
