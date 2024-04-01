@@ -47,7 +47,6 @@ public class HomeScreen extends JFrame {
     private JButton uploadImageUpdate;
     private DataBase dataBase;
 
-
     public HomeScreen() throws IOException {
 
         updateButton.setEnabled(false);
@@ -77,9 +76,8 @@ public class HomeScreen extends JFrame {
                 updateState();
             }
         });
-
-
     }
+
     private void searchInformation(){
         try {
             ResultSet resultSet = dataBase.searchInformation(identificationTextField.getText());
