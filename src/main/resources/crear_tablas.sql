@@ -6,5 +6,5 @@ CREATE TABLE IF NOT EXISTS EMPLOYEE (
     direction varchar(50),
     phone varchar(10),
     birthdate date,
-    image MEDIUMBLOB
+    image BYTEA
     );

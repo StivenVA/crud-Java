@@ -24,7 +24,7 @@ public class HomeScreen extends JFrame {
 
     private boolean updatedImage;
     private File selectedImage;
-    private Blob updateImage;
+    private InputStream updateImage;
     private JPanel mainPanel;
     private JTextField idTxt;
     private JTextField nameTxt;
@@ -265,14 +265,12 @@ public class HomeScreen extends JFrame {
         showDirection.setText(resultSet.getString("direction"));
         showPhone.setText(resultSet.getString("phone"));
         showBirthdate.setText("Fecha de nacimiento: " + resultSet.getDate("birthdate"));
-        Blob blob = resultSet.getBlob("image");
-        setImageIcon(convertBlobToImage(blob),showImage);
+        InputStream inputStream = resultSet.getBinaryStream("image");
+        setImageIcon(convertBinaryStreamToImage(inputStream),showImage);
     }
 
-    private Image convertBlobToImage(Blob blob) throws IOException,SQLException{
-        updateImage = blob;
-
-        InputStream inputStream = blob.getBinaryStream();
+    private Image convertBinaryStreamToImage(InputStream inputStream) throws IOException,SQLException{
+        updateImage = inputStream;
 
         byte[] bytes = inputStream.readAllBytes();
 

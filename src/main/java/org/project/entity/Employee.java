@@ -1,11 +1,12 @@
 package org.project.entity;
 
 import java.io.File;
+import java.io.InputStream;
 import java.sql.Blob;
 import java.util.Date;
 
 public class Employee {
-    private Blob updateImage;
+    private InputStream updateImage;
     private String id, name, lastName, email, direction, phone;
     private Date birthdate;
 
@@ -25,11 +26,11 @@ public class Employee {
         this.birthdate = birthdate;
     }
 
-    public void setUpdateImage(Blob updateImage){
+    public void setUpdateImage(InputStream updateImage){
         this.updateImage = updateImage;
     }
 
-    public Blob getUpdateImage(){
+    public InputStream getUpdateImage(){
         return updateImage;
     }
 

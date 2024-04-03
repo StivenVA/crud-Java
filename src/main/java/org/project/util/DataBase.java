@@ -14,11 +14,18 @@ public class DataBase {
 
     public DataBase(){
         try {
-            connection = DriverManager.getConnection("jdbc:h2:~/employees", "sa", "");
-            crearTablas();
-        }catch (SQLException | IOException e){
+           usePostgresQLConnection();
+        }catch (SQLException e){
             e.printStackTrace();
         }
+    }
+
+    public void useMySqlConnection() throws SQLException {
+        connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/employee", "root", "root");
+    }
+
+    public void usePostgresQLConnection() throws SQLException {
+        connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/employee", "postgres", "root");
     }
 
     private void crearTablas() throws IOException, SQLException {
@@ -56,7 +63,7 @@ public class DataBase {
     public ResultSet searchInformation(String identification) throws SQLException {
         String query = "SELECT * FROM employee WHERE id = ?";
         preparedStatement = connection.prepareStatement(query);
-        preparedStatement.setString(1, identification);
+        preparedStatement.setInt(1, Integer.parseInt(identification));
         return preparedStatement.executeQuery();
 
     }
@@ -76,18 +83,21 @@ public class DataBase {
                 " name='"+employee.getName()+"'," +
                 "last_name='"+employee.getLastName()+"'," +
                 "email='"+employee.getEmail()+"'," +
-                "direction='"+employee.getEmail()+"'," +
-                "phone='"+employee.getPhone()+"'," +
-                "image=? where id ="+employee.getId();
+                "direction='"+employee.getDirection()+"'," +
+                "phone='"+employee.getPhone()+"'";
 
-        preparedStatement = connection.prepareStatement(query);
+
 
         if (employee.getImage() !=null) {
+            query += ",image=?  where id ="+employee.getId();
+            preparedStatement = connection.prepareStatement(query);
             fis = convertImageToInputStream(employee.getImage());
+
             preparedStatement.setBinaryStream(1, fis, (int) employee.getImage().length());
         }
-        else {
-            preparedStatement.setBlob(1,employee.getUpdateImage());
+        else{
+            query +=" where id ="+employee.getId();
+            preparedStatement = connection.prepareStatement(query);
         }
 
         try {
