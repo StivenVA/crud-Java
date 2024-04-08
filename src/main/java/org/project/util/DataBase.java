@@ -14,18 +14,10 @@ public class DataBase {
 
     public DataBase(){
         try {
-           usePostgresQLConnection();
+           connection = DatabaseConnectionFactory.createConnection("postgresql");
         }catch (SQLException e){
             e.printStackTrace();
         }
-    }
-
-    public void useMySqlConnection() throws SQLException {
-        connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/employee", "root", "root");
-    }
-
-    public void usePostgresQLConnection() throws SQLException {
-        connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/employee", "postgres", "root");
     }
 
     private void crearTablas() throws IOException, SQLException {
