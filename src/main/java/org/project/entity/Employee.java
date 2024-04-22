@@ -16,16 +16,6 @@ public class Employee {
 
     }
 
-    public Employee(String id, String name, String lastName, String email, String direction, String phone, Date birthdate) {
-        this.id = id;
-        this.name = name;
-        this.lastName = lastName;
-        this.email = email;
-        this.direction = direction;
-        this.phone = phone;
-        this.birthdate = birthdate;
-    }
-
     public void setUpdateImage(InputStream updateImage){
         this.updateImage = updateImage;
     }

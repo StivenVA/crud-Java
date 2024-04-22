@@ -5,6 +5,7 @@ import org.bytedeco.opencv.opencv_videoio.VideoCapture;
 import org.project.components.CameraComponent;
 import org.project.entity.Employee;
 import org.project.interfaces.Observer;
+import org.project.util.InputStreamConverter;
 import org.project.util.dbconfig.DataBase;
 
 import javax.imageio.ImageIO;
@@ -127,6 +128,8 @@ public class HomeScreen extends JFrame implements Observer {
     }
 
     private void setInformationInConsultFieldsAfterSearch(ResultSet resultSet) throws SQLException, IOException {
+        InputStreamConverter inputStreamConverter = new InputStreamConverter();
+
         showId.setText("ID: " + resultSet.getInt("id"));
         showName.setText(resultSet.getString("name"));
         showLastName.setText(resultSet.getString("last_name"));
@@ -135,16 +138,11 @@ public class HomeScreen extends JFrame implements Observer {
         showPhone.setText(resultSet.getString("phone"));
         showBirthdate.setText("Fecha de nacimiento: " + resultSet.getDate("birthdate"));
         InputStream inputStream = resultSet.getBinaryStream("image");
-        setImageIcon(convertBinaryStreamToImage(inputStream),showImage);
-    }
-
-    private Image convertBinaryStreamToImage(InputStream inputStream) throws IOException,SQLException{
+        setImageIcon(inputStreamConverter.convertBinaryStreamToImage(inputStream),showImage);
         updateImage = inputStream;
-
-        byte[] bytes = inputStream.readAllBytes();
-
-        return ImageIO.read(new ByteArrayInputStream(bytes));
     }
+
+
 
     private void selectImage(JLabel labelImage) {
         JFileChooser jFileChooser = new JFileChooser();

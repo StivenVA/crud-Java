@@ -171,7 +171,8 @@ public class CameraComponent extends  JFrame implements Runnable, Observable {
                     // Mostrar la imagen en el JLabel
                     imageCaptureLabel.setIcon(new ImageIcon(image));
                 }
-            }catch (Exception ignored){}
+            }catch (Exception ignored){
+            }
         }
     }
 
