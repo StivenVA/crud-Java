@@ -1,4 +1,7 @@
-package org.project.util;
+package org.project.util.dbconfig;
+
+import org.project.util.dbconfig.connection.MySQLConnection;
+import org.project.util.dbconfig.connection.PostgresQLConnection;
 
 import java.sql.Connection;
 import java.sql.SQLException;

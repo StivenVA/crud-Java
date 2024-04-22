@@ -1,4 +1,4 @@
-package org.project.util;
+package org.project.util.dbconfig;
 
 import org.project.entity.Employee;
 
@@ -15,6 +15,14 @@ public class DataBase {
     public DataBase(){
         try {
            connection = DatabaseConnectionFactory.createConnection("postgresql");
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+    }
+
+    public DataBase(String motor){
+        try {
+            connection = DatabaseConnectionFactory.createConnection(motor);
         }catch (SQLException e){
             e.printStackTrace();
         }

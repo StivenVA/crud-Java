@@ -1,9 +1,11 @@
-package org.project.gui;
+package org.project.views.gui;
 
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_videoio.VideoCapture;
+import org.project.components.CameraComponent;
 import org.project.entity.Employee;
-import org.project.util.DataBase;
+import org.project.interfaces.Observer;
+import org.project.util.dbconfig.DataBase;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -20,7 +22,7 @@ import java.io.InputStream;
 import java.sql.*;
 import java.time.LocalDate;
 
-public class HomeScreen extends JFrame {
+public class HomeScreen extends JFrame implements Observer {
 
     private boolean updatedImage;
     private File selectedImage;
@@ -53,20 +55,19 @@ public class HomeScreen extends JFrame {
     private JButton takePhoto;
     private DataBase dataBase;
 
-    private JLabel imageCaptureLabel;
-    private VideoCapture capture;
+    private Thread cameraThread;
+    private CameraComponent cameraComponent;
+    private boolean isCameraOn;
 
-    private  JDialog cameraFrame;
-
-    private boolean createdImage;
     public HomeScreen() throws IOException {
-        cameraFrame = new JDialog();
+        cameraComponent = CameraComponent.getCameraComponent();
+        cameraComponent.registryObserver(this);
 
         updateButton.setEnabled(false);
         deleteButton.setEnabled(false);
         uploadImageUpdate.setEnabled(false);
 
-        dataBase = new DataBase();
+        dataBase = new DataBase("mysql");
         setContentPane(mainPanel);
 
         addEmployeeBtn.addActionListener(e -> addUser());
@@ -94,153 +95,14 @@ public class HomeScreen extends JFrame {
             }
         });
 
-        takePhoto.addActionListener(e->startCamera());
-        cameraFrame.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosed(WindowEvent e) {
-                super.windowClosed(e);
-                closeCamera();
+        takePhoto.addActionListener(e->startCapture());
 
-            }
-        });
-    }
-
-    private void startCamera(){
-        initializeCamera();
-        configureCamera();
-    }
-
-    private void configureCamera(){
-
-        JPanel panel = new JPanel();
-
-        cameraFrame.setTitle("Captura de Cámara");
-        cameraFrame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        cameraFrame.setSize(640, 480);
-        JButton captureButton = new JButton("Capturar");
-        JButton exitButton = new JButton("salir");
-
-        imageCaptureLabel = new JLabel();
-        cameraFrame.setLocationRelativeTo(this);
-        captureButton.addActionListener(e -> captureImage());
-        exitButton.addActionListener(e->{
-            cameraFrame.dispose();
-            closeCamera();
-        });
-
-        panel.add(captureButton);
-        panel.add(exitButton);
-
-        cameraFrame.getContentPane().setLayout(new BorderLayout());
-        cameraFrame.getContentPane().add(imageCaptureLabel, BorderLayout.CENTER);
-        cameraFrame.getContentPane().add(panel,BorderLayout.SOUTH);
-
-        cameraFrame.setVisible(true);
-    }
-
-    private void initializeCamera(){
-        capture = new VideoCapture(0);
-        if (!capture.isOpened()) {
-            System.out.println("Error al abrir la cámara");
-        } else {
-            System.out.println("Cámara abierta correctamente");
-            // Comenzar la captura de la cámara
-            startCapture();
-        }
     }
 
     private void startCapture() {
-        new Thread(() -> {
-            while (true) {
-                Mat frame = new Mat();
-                try {
-                    if (capture.read(frame)) {
-                        // Convertir el fotograma de OpenCV a una imagen de Swing
-                        BufferedImage image = matToBufferedImage(frame);
-                        // Mostrar la imagen en el JLabel
-                        imageCaptureLabel.setIcon(new ImageIcon(image));
-                }
-                }catch (Exception ignored){}
-            }
-        }).start();
-    }
-
-    private void closeCamera(){
-            Thread.currentThread().interrupt();
-            capture.close();
-    }
-
-    private void captureImage() {
-        Mat frame = new Mat();
-        if (capture.read(frame)) {
-
-            BufferedImage image = matToBufferedImage(frame);
-
-            JDialog capturedFrame = new JDialog();
-            capturedFrame.setTitle("Imagen capturada");
-            capturedFrame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-            capturedFrame.setSize(image.getWidth(), image.getHeight());
-
-            JPanel panel = getjPanelForCapturePhoto(image, capturedFrame);
-
-            JLabel capturedImageLabel = new JLabel(new ImageIcon(image));
-            capturedFrame.setLayout(new BorderLayout());
-            capturedFrame.getContentPane().add(capturedImageLabel,BorderLayout.CENTER);
-            capturedFrame.getContentPane().add(panel,BorderLayout.SOUTH);
-            capturedFrame.setVisible(true);
-        }
-    }
-
-    private JPanel getjPanelForCapturePhoto(BufferedImage image, JDialog capturedFrame) {
-        JButton reTryPhoto = new JButton("Volver a tomar la foto");
-        JButton acceptPhoto = new JButton("Guardar foto");
-
-        acceptPhoto.addActionListener(e->{
-            setImageIcon(image,this.imageLabel);
-            saveTakenPhoto(image);
-            createdImage = true;
-            capturedFrame.dispose();
-            cameraFrame.dispose();
-            System.out.println(this.imageLabel.getIcon() == null);
-        });
-        reTryPhoto.addActionListener(e-> capturedFrame.dispose());
-
-        JPanel panel = new JPanel();
-        panel.add(reTryPhoto);
-        panel.add(acceptPhoto);
-        return panel;
-    }
-
-    private void saveTakenPhoto(BufferedImage photo){
-        File outputImageFile = new File("img"+ LocalDate.now()+".jpg");
-
-        try {
-            ImageIO.write(photo,"jpg",outputImageFile);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        this.selectedImage = outputImageFile;
-    }
-
-    private BufferedImage matToBufferedImage(Mat mat) {
-        int width = mat.cols();
-        int height = mat.rows();
-        int channels = mat.channels();
-        byte[] data = new byte[width * height * channels];
-        mat.data().get(data);
-
-        // Convertir el formato de los canales de BGR a RGB
-        byte[] newData = new byte[width * height * channels];
-        for (int i = 0; i < width * height; i++) {
-            newData[i * 3] = data[i * 3 + 2];     // R
-            newData[i * 3 + 1] = data[i * 3 + 1]; // G
-            newData[i * 3 + 2] = data[i * 3];     // B
-        }
-
-        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
-        image.getRaster().setDataElements(0, 0, width, height, newData);
-        return image;
+        isCameraOn = true;
+        cameraThread = new Thread(cameraComponent);
+        cameraThread.start();
     }
 
     private void searchInformation(){
@@ -286,14 +148,17 @@ public class HomeScreen extends JFrame {
             BufferedImage originalImage;
             try {
                 this.selectedImage = jFileChooser.getSelectedFile();
-                originalImage = ImageIO.read(selectedImage);
+               originalImage = convertFileToBufferedImage(selectedImage);
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
             setImageIcon(originalImage, labelImage);
             updatedImage = true;
-            createdImage = false;
         } else updatedImage = false;
+    }
+
+    private BufferedImage convertFileToBufferedImage(File selectedImage) throws IOException {
+        return  ImageIO.read(selectedImage);
     }
 
     private <T extends Image> void setImageIcon(T image, JLabel imageLabel) {
@@ -369,7 +234,6 @@ public class HomeScreen extends JFrame {
             if (fieldsAddNoAreBlank()) {
                 dataBase.insert(createEmployee());
                 setAddPaneBlankFields();
-                if (createdImage) this.selectedImage.delete();
             } else showModal("Complete todos los campos",false);
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -449,6 +313,20 @@ public class HomeScreen extends JFrame {
                 && !lastNameTxt.getText().isBlank()
                 && !nameTxt.getText().isBlank()
                 && selectedImage != null;
+    }
+
+    @Override
+    public void notify(File imageFile) {
+        if (isCameraOn){
+            this.selectedImage = imageFile;
+            try {
+                BufferedImage image = convertFileToBufferedImage(selectedImage);
+                setImageIcon(image,imageLabel);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            isCameraOn = false;
+        }
     }
 
 }
