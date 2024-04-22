@@ -19,6 +19,7 @@ public class ConsoleView implements Runnable, Observer {
     private File imageFile;
     private String idForUpdate;
     private Employee employeeForUpdate;
+    private boolean isUpdate;
 
     public ConsoleView() {
         in = new Scanner(System.in);
@@ -98,6 +99,7 @@ public class ConsoleView implements Runnable, Observer {
                 employee.setPhone(in.nextLine());
                 break;
             case 6:
+                isUpdate = true;
                 System.out.println("Enter the new image: ");
                 thread.start();
                 break;
@@ -106,6 +108,7 @@ public class ConsoleView implements Runnable, Observer {
                 employee.setBirthdate(Date.valueOf(in.nextLine()));
                 break;
             case 8:
+                isUpdate = true;
                 System.out.println("Enter the new name: ");
                 employeeForUpdate.setName(in.nextLine());
                 System.out.println("Enter the new last name: ");
@@ -160,8 +163,15 @@ public class ConsoleView implements Runnable, Observer {
         while (option != 3);
     }
 
+    public void update(){
+
+    }
+
     @Override
     public void notify(File imageFile) {
+        if (!isUpdate) return;
+
+        isUpdate = false;
         Employee employee = null;
         ResultSet resultSet;
         try {

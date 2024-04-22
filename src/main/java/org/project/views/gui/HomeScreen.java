@@ -97,6 +97,13 @@ public class HomeScreen extends JFrame implements Observer {
 
         takePhoto.addActionListener(e->startCapture());
 
+        setTitle("Welcome");
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        setSize(900, 1000);
+        pack();
+        setLocationRelativeTo(null);
+        setVisible(true);
+
     }
 
     private void startCapture() {

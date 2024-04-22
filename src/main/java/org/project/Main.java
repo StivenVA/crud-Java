@@ -9,26 +9,15 @@ import java.io.IOException;
 
 public class Main {
     public static void main(String[] args) {
-        ConsoleView consoleView = new ConsoleView();
 
-        Thread thread = new Thread(consoleView);
+        Thread thread = new Thread(new ConsoleView());
         thread.start();
 
-        SwingUtilities.invokeLater(()->{
-            HomeScreen screen;
-            try {
-                screen = new HomeScreen();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-
-            screen.setVisible(true);
-            screen.setTitle("Welcome");
-            screen.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-            screen.setSize(900, 1000);
-            screen.pack();
-            screen.setLocationRelativeTo(null);
-        });
+        try {
+            new HomeScreen();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
     }
 
