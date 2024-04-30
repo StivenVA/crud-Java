@@ -1,4 +1,4 @@
-package org.project.util.dbconfig.connection;
+package org.project.config.dbconfig.connection;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

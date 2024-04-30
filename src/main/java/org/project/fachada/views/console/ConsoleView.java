@@ -1,34 +1,31 @@
-package org.project.views.console;
+package org.project.fachada.views.console;
 
-import org.project.components.CameraComponent;
-import org.project.entity.Employee;
+import org.project.util.EmployeeMapper;
+import org.project.util.components.CameraComponent;
+import org.project.dto.EmployeeDTO;
 import org.project.interfaces.Observer;
-import org.project.util.InputStreamConverter;
-import org.project.util.dbconfig.DataBase;
+import org.project.config.dbconfig.repository.EmployeesRepository;
 
 import java.io.File;
-import java.io.IOException;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Scanner;
 
 public class ConsoleView implements Runnable, Observer {
-    private Scanner in;
-    private DataBase dataBase;
-    private CameraComponent cameraComponent;
-    private Thread thread;
-    private Employee employeeForUpdate;
+    private final Scanner in;
+    private final EmployeesRepository employeesRepository;
+    private final Thread thread;
+    private EmployeeDTO employeeDTOForUpdate;
     private boolean isUpdate;
 
     public ConsoleView() {
         in = new Scanner(System.in);
-        dataBase = new DataBase("mysql");
-        cameraComponent = CameraComponent.getCameraComponent();
+        employeesRepository = new EmployeesRepository("mysql");
+        CameraComponent cameraComponent = CameraComponent.getCameraComponent();
         cameraComponent.registryObserver(this);
         thread = new Thread(cameraComponent);
     }
-
 
     @Override
     public void run() {
@@ -65,18 +62,18 @@ public class ConsoleView implements Runnable, Observer {
         while (option >3 || option < 1);
     }
 
-    public void createUser() {
+    private void createUser() {
 
         try {
-            dataBase.insert(createEmployee());
+            employeesRepository.save(EmployeeMapper.toEmployee(createEmployee()));
             System.out.println("User created succesfully");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void updateUser(){
-        employeeForUpdate = new Employee();
+    private void updateUser(){
+        employeeDTOForUpdate = new EmployeeDTO();
         ResultSet resultSet;
         boolean exist;
         isUpdate = true;
@@ -85,7 +82,7 @@ public class ConsoleView implements Runnable, Observer {
             do{
                 System.out.println("Enter the user id: ");
                 String id = in.nextLine();
-                resultSet = dataBase.searchInformation(id);
+                resultSet = employeesRepository.findById(id);
 
                 exist = resultSet.next();
                 if (!exist)
@@ -93,14 +90,14 @@ public class ConsoleView implements Runnable, Observer {
 
             }while (!exist);
 
-            employeeForUpdate.setUpdateImage(resultSet.getBinaryStream("image"));
-            employeeForUpdate.setId(resultSet.getString("id"));
-            employeeForUpdate.setName(resultSet.getString("name"));
-            employeeForUpdate.setLastName(resultSet.getString("last_name"));
-            employeeForUpdate.setEmail(resultSet.getString("email"));
-            employeeForUpdate.setDirection(resultSet.getString("direction"));
-            employeeForUpdate.setPhone(resultSet.getString("phone"));
-            employeeForUpdate.setBirthdate(resultSet.getDate("birthdate"));
+            employeeDTOForUpdate.setUpdateImage(resultSet.getBinaryStream("image"));
+            employeeDTOForUpdate.setId(resultSet.getString("id"));
+            employeeDTOForUpdate.setName(resultSet.getString("name"));
+            employeeDTOForUpdate.setLastName(resultSet.getString("last_name"));
+            employeeDTOForUpdate.setEmail(resultSet.getString("email"));
+            employeeDTOForUpdate.setDirection(resultSet.getString("direction"));
+            employeeDTOForUpdate.setPhone(resultSet.getString("phone"));
+            employeeDTOForUpdate.setBirthdate(resultSet.getDate("birthdate"));
 
         }catch (SQLException e) {
             throw new RuntimeException(e);
@@ -123,27 +120,27 @@ public class ConsoleView implements Runnable, Observer {
         switch (option) {
             case 1:
                 System.out.println("Enter the new name: ");
-                employeeForUpdate.setName(in.nextLine());
+                employeeDTOForUpdate.setName(in.nextLine());
                 update();
                 break;
             case 2:
                 System.out.println("Enter the new last name: ");
-                employeeForUpdate.setLastName(in.nextLine());
+                employeeDTOForUpdate.setLastName(in.nextLine());
                 update();
                 break;
             case 3:
                 System.out.println("Enter the new email: ");
-                employeeForUpdate.setEmail(in.nextLine());
+                employeeDTOForUpdate.setEmail(in.nextLine());
                 update();
                 break;
             case 4:
                 System.out.println("Enter the new direction: ");
-                employeeForUpdate.setDirection(in.nextLine());
+                employeeDTOForUpdate.setDirection(in.nextLine());
                 update();
                 break;
             case 5:
                 System.out.println("Enter the new phone: ");
-                employeeForUpdate.setPhone(in.nextLine());
+                employeeDTOForUpdate.setPhone(in.nextLine());
                 update();
                 break;
             case 6:
@@ -152,23 +149,23 @@ public class ConsoleView implements Runnable, Observer {
                 break;
             case 7:
                 System.out.println("Enter the new birthdate: ");
-                employeeForUpdate.setBirthdate(Date.valueOf(in.nextLine()));
+                employeeDTOForUpdate.setBirthdate(Date.valueOf(in.nextLine()));
                 update();
                 break;
             case 8:
                 isUpdate = true;
                 System.out.println("Enter the new name: ");
-                employeeForUpdate.setName(in.nextLine());
+                employeeDTOForUpdate.setName(in.nextLine());
                 System.out.println("Enter the new last name: ");
-                employeeForUpdate.setLastName(in.nextLine());
+                employeeDTOForUpdate.setLastName(in.nextLine());
                 System.out.println("Enter the new email: ");
-                employeeForUpdate.setEmail(in.nextLine());
+                employeeDTOForUpdate.setEmail(in.nextLine());
                 System.out.println("Enter the new direction: ");
-                employeeForUpdate.setDirection(in.nextLine());
+                employeeDTOForUpdate.setDirection(in.nextLine());
                 System.out.println("Enter the new phone: ");
-                employeeForUpdate.setPhone(in.nextLine());
+                employeeDTOForUpdate.setPhone(in.nextLine());
                 System.out.println("Enter the new birthdate: ");
-                employeeForUpdate.setBirthdate(Date.valueOf(in.nextLine()));
+                employeeDTOForUpdate.setBirthdate(Date.valueOf(in.nextLine()));
                 System.out.println("Enter the new image: ");
                 thread.start();
                 break;
@@ -182,38 +179,38 @@ public class ConsoleView implements Runnable, Observer {
 
     public void update(){
         try {
-            dataBase.updateInformation(employeeForUpdate);
+            employeesRepository.update(EmployeeMapper.toEmployee(employeeDTOForUpdate));
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public Employee createEmployee(){
-        Employee employee = new Employee();
+    public EmployeeDTO createEmployee(){
+        EmployeeDTO employeeDTO = new EmployeeDTO();
         in.nextLine();
         System.out.println("Enter the user id: ");
-        employee.setId(in.nextLine());
+        employeeDTO.setId(in.nextLine());
         System.out.println("Enter the user name: ");
-        employee.setName(in.nextLine());
+        employeeDTO.setName(in.nextLine());
         System.out.println("Enter the user last name: ");
-        employee.setLastName(in.nextLine());
+        employeeDTO.setLastName(in.nextLine());
         System.out.println("Enter the user email: ");
-        employee.setEmail(in.nextLine());
+        employeeDTO.setEmail(in.nextLine());
         System.out.println("Enter the user direction: ");
-        employee.setDirection(in.nextLine());
+        employeeDTO.setDirection(in.nextLine());
         System.out.println("Enter the user phone: ");
-        employee.setPhone(in.nextLine());
+        employeeDTO.setPhone(in.nextLine());
         System.out.println("Enter the user birthdate: ");
-        employee.setBirthdate(Date.valueOf(in.nextLine()));
-        employee.setImage(new File("src/main/resources/white.png"));
+        employeeDTO.setBirthdate(Date.valueOf(in.nextLine()));
+        employeeDTO.setImage(new File("src/main/resources/white.png"));
 
-        return employee;
+        return employeeDTO;
     }
 
     public void deleteUser(){
         System.out.println("Enter the user id: ");
         try {
-            dataBase.deleteInformation(in.nextLine());
+            employeesRepository.deleteById(in.nextLine());
             System.out.println("User deleted succesfully");
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -225,11 +222,10 @@ public class ConsoleView implements Runnable, Observer {
         if (!isUpdate) return;
 
         try {
-            if(employeeForUpdate.getId()!=null){
-                employeeForUpdate.setImage(imageFile);
+            if(employeeDTOForUpdate.getId()!=null){
+                employeeDTOForUpdate.setImage(imageFile);
 
-                dataBase.updateInformation(employeeForUpdate);
-                imageFile.delete();
+                employeesRepository.update(EmployeeMapper.toEmployee(employeeDTOForUpdate));
                 System.out.println("User updated succesfully");
                 isUpdate = false;
             }
@@ -237,6 +233,11 @@ public class ConsoleView implements Runnable, Observer {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void iniciar(){
+        Thread threadConsole = new Thread(this);
+        threadConsole.start();
     }
 
 }

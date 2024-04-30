@@ -1,17 +1,26 @@
-package org.project.entity;
+package org.project.dto;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.Date;
 
-public class Employee {
-
+public class EmployeeDTO {
+    private InputStream updateImage;
     private String id, name, lastName, email, direction, phone;
     private Date birthdate;
 
     private File image;
 
-    public Employee(){
+    public EmployeeDTO(){
 
+    }
+
+    public void setUpdateImage(InputStream updateImage){
+        this.updateImage = updateImage;
+    }
+
+    public InputStream getUpdateImage(){
+        return updateImage;
     }
 
     public String getId() {

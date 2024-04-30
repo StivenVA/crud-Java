@@ -1,27 +1,22 @@
-package org.project.views.gui;
+package org.project.fachada.views.gui;
 
-import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_videoio.VideoCapture;
-import org.project.components.CameraComponent;
-import org.project.entity.Employee;
+import org.project.util.EmployeeMapper;
+import org.project.util.components.CameraComponent;
+import org.project.dto.EmployeeDTO;
 import org.project.interfaces.Observer;
 import org.project.util.InputStreamConverter;
-import org.project.util.dbconfig.DataBase;
+import org.project.config.dbconfig.repository.EmployeesRepository;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.*;
-import java.time.LocalDate;
 
 public class HomeScreen extends JFrame implements Observer {
 
@@ -54,10 +49,9 @@ public class HomeScreen extends JFrame implements Observer {
 
     private JButton uploadImageUpdate;
     private JButton takePhoto;
-    private DataBase dataBase;
+    private final EmployeesRepository employeesRepository;
 
-    private Thread cameraThread;
-    private CameraComponent cameraComponent;
+    private final CameraComponent cameraComponent;
     private boolean isCameraOn;
 
     public HomeScreen() throws IOException {
@@ -68,7 +62,7 @@ public class HomeScreen extends JFrame implements Observer {
         deleteButton.setEnabled(false);
         uploadImageUpdate.setEnabled(false);
 
-        dataBase = new DataBase("mysql");
+        employeesRepository = new EmployeesRepository("mysql");
         setContentPane(mainPanel);
 
         addEmployeeBtn.addActionListener(e -> addUser());
@@ -98,24 +92,17 @@ public class HomeScreen extends JFrame implements Observer {
 
         takePhoto.addActionListener(e->startCapture());
 
-        setTitle("Welcome");
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        setSize(900, 1000);
-        pack();
-        setLocationRelativeTo(null);
-        setVisible(true);
-
     }
 
     private void startCapture() {
         isCameraOn = true;
-        cameraThread = new Thread(cameraComponent);
+        Thread cameraThread = new Thread(cameraComponent);
         cameraThread.start();
     }
 
     private void searchInformation(){
         try {
-            ResultSet resultSet = dataBase.searchInformation(identificationTextField.getText());
+            ResultSet resultSet = employeesRepository.findById(identificationTextField.getText());
 
             if (resultSet.next()) {
                 setInformationInConsultFieldsAfterSearch(resultSet);
@@ -128,8 +115,6 @@ public class HomeScreen extends JFrame implements Observer {
     }
 
     private void setInformationInConsultFieldsAfterSearch(ResultSet resultSet) throws SQLException, IOException {
-        InputStreamConverter inputStreamConverter = new InputStreamConverter();
-
         showId.setText("ID: " + resultSet.getInt("id"));
         showName.setText(resultSet.getString("name"));
         showLastName.setText(resultSet.getString("last_name"));
@@ -138,7 +123,7 @@ public class HomeScreen extends JFrame implements Observer {
         showPhone.setText(resultSet.getString("phone"));
         showBirthdate.setText("Fecha de nacimiento: " + resultSet.getDate("birthdate"));
         InputStream inputStream = resultSet.getBinaryStream("image");
-        setImageIcon(inputStreamConverter.convertBinaryStreamToImage(inputStream),showImage);
+        setImageIcon(InputStreamConverter.convertBinaryStreamToImage(inputStream),showImage);
         updateImage = inputStream;
     }
 
@@ -226,9 +211,8 @@ public class HomeScreen extends JFrame implements Observer {
 
     private void updateInformationEmployee() {
         try {
-            if (dataBase.updateInformation(updateEmployee()))
-                showModal("Usuario actualizado correctamente", false);
-
+            employeesRepository.update(EmployeeMapper.toEmployee(createUpdatedEmployee()));
+            showModal("Usuario actualizado correctamente", false);
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
@@ -237,7 +221,8 @@ public class HomeScreen extends JFrame implements Observer {
     private void addUser() {
         try {
             if (fieldsAddNoAreBlank()) {
-                dataBase.insert(createEmployee());
+                System.out.println(selectedImage);
+                employeesRepository.save(EmployeeMapper.toEmployee(createEmployee()));
                 setAddPaneBlankFields();
             } else showModal("Complete todos los campos",false);
         } catch (Exception ex) {
@@ -245,19 +230,19 @@ public class HomeScreen extends JFrame implements Observer {
         }
     }
 
-    private Employee createEmployee() {
-        Employee employee = new Employee();
+    private EmployeeDTO createEmployee() {
+        EmployeeDTO employeeDTO = new EmployeeDTO();
 
-        employee.setBirthdate(Date.valueOf(birthdateTxt.getText()));
-        employee.setDirection(directionTxt.getText());
-        employee.setEmail(emailTxt.getText());
-        employee.setId(idTxt.getText());
-        employee.setPhone(phoneTxt.getText());
-        employee.setLastName(lastNameTxt.getText());
-        employee.setName(nameTxt.getText());
-        employee.setImage(selectedImage);
+        employeeDTO.setBirthdate(Date.valueOf(birthdateTxt.getText()));
+        employeeDTO.setDirection(directionTxt.getText());
+        employeeDTO.setEmail(emailTxt.getText());
+        employeeDTO.setId(idTxt.getText());
+        employeeDTO.setPhone(phoneTxt.getText());
+        employeeDTO.setLastName(lastNameTxt.getText());
+        employeeDTO.setName(nameTxt.getText());
+        employeeDTO.setImage(selectedImage);
 
-        return employee;
+        return employeeDTO;
     }
 
 
@@ -272,25 +257,25 @@ public class HomeScreen extends JFrame implements Observer {
         imageLabel.setIcon(null);
     }
 
-    private Employee updateEmployee() {
-        Employee employee = new Employee();
+    private EmployeeDTO createUpdatedEmployee() {
+        EmployeeDTO employeeDTO = new EmployeeDTO();
 
-        employee.setEmail(showEmail.getText());
-        employee.setDirection(showDirection.getText());
-        employee.setName(showName.getText());
-        employee.setLastName(showLastName.getText());
-        employee.setPhone(showPhone.getText());
-        employee.setId(identificationTextField.getText());
-        employee.setImage(null);
-        if (!updatedImage) employee.setUpdateImage(updateImage);
-        else employee.setImage(selectedImage);
+        employeeDTO.setEmail(showEmail.getText());
+        employeeDTO.setDirection(showDirection.getText());
+        employeeDTO.setName(showName.getText());
+        employeeDTO.setLastName(showLastName.getText());
+        employeeDTO.setPhone(showPhone.getText());
+        employeeDTO.setId(identificationTextField.getText());
+        employeeDTO.setImage(null);
+        if (!updatedImage) employeeDTO.setUpdateImage(updateImage);
+        else employeeDTO.setImage(selectedImage);
 
-        return employee;
+        return employeeDTO;
     }
 
     private void deleteInformationEmployee() {
         try {
-            dataBase.deleteInformation(identificationTextField.getText());
+            employeesRepository.deleteById(identificationTextField.getText());
             setConsultPaneBlankFields();
         } catch (SQLException ex) {
             throw new RuntimeException(ex);
@@ -324,6 +309,7 @@ public class HomeScreen extends JFrame implements Observer {
     public void notify(File imageFile) {
         if (isCameraOn){
             this.selectedImage = imageFile;
+            System.out.println(selectedImage);
             try {
                 BufferedImage image = convertFileToBufferedImage(selectedImage);
                 setImageIcon(image,imageLabel);
@@ -332,6 +318,15 @@ public class HomeScreen extends JFrame implements Observer {
             }
             isCameraOn = false;
         }
+    }
+
+    public void iniciar(){
+        setTitle("Welcome");
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        setSize(900, 1000);
+        pack();
+        setLocationRelativeTo(null);
+        setVisible(true);
     }
 
 }

@@ -1,4 +1,4 @@
-package org.project.components;
+package org.project.util.components;
 
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_videoio.VideoCapture;

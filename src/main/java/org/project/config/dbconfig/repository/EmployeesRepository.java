@@ -1,50 +1,28 @@
-package org.project.util.dbconfig;
+package org.project.config.dbconfig.repository;
 
+import org.project.config.dbconfig.DatabaseConnectionFactory;
+import org.project.dto.EmployeeDTO;
 import org.project.entity.Employee;
+import org.project.interfaces.repository.EmployeeRepository;
+import org.project.util.InputStreamConverter;
 
 import java.io.*;
 import java.sql.*;
-import org.project.Main;
 
-public class DataBase {
+public class EmployeesRepository implements EmployeeRepository {
 
     Connection connection;
     PreparedStatement preparedStatement;
 
-
-    public DataBase(){
+    public EmployeesRepository(String motor){
         try {
-           connection = DatabaseConnectionFactory.createConnection("postgresql");
-        }catch (SQLException e){
-            e.printStackTrace();
+            connection = DatabaseConnectionFactory.getInstance().createConnection(motor);
+        } catch (SQLException ignored) {
         }
     }
 
-    public DataBase(String motor){
-        try {
-            connection = DatabaseConnectionFactory.createConnection(motor);
-        }catch (SQLException e){
-            e.printStackTrace();
-        }
-    }
-
-    private void crearTablas() throws IOException, SQLException {
-
-        InputStream inputStream = Main.class.getResourceAsStream("/crear_tablas.sql");
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-        StringBuilder sqlBuilder = new StringBuilder();
-        String line;
-        while ((line = reader.readLine()) != null) {
-            sqlBuilder.append(line);
-            sqlBuilder.append("\n");
-        }
-        reader.close();
-
-       preparedStatement = connection.prepareStatement(sqlBuilder.toString());
-       preparedStatement.executeUpdate();
-    }
-
-    public void insert(Employee employee) throws Exception{
+    @Override
+    public void save(Employee employee) throws Exception{
         String query = "INSERT INTO employee VALUES (?,?,?,?,?,?,?,?)";
         preparedStatement = connection.prepareStatement(query);
         preparedStatement.setInt(1, Integer.parseInt(employee.getId()));
@@ -60,7 +38,8 @@ public class DataBase {
         preparedStatement.executeUpdate();
     }
 
-    public ResultSet searchInformation(String identification) throws SQLException {
+    @Override
+    public ResultSet findById(String identification) throws SQLException {
         String query = "SELECT * FROM employee WHERE id = ?";
         preparedStatement = connection.prepareStatement(query);
         preparedStatement.setInt(1, Integer.parseInt(identification));
@@ -68,15 +47,10 @@ public class DataBase {
 
     }
 
-    private FileInputStream convertImageToInputStream(File image){
-        try {
-            return new FileInputStream(image);
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
-    public boolean updateInformation(Employee employee) throws SQLException {
+
+    @Override
+    public boolean update(Employee employee) throws SQLException {
 
         FileInputStream fis;
         String query = "update EMPLOYEE set" +
@@ -86,12 +60,10 @@ public class DataBase {
                 "direction='"+employee.getDirection()+"'," +
                 "phone='"+employee.getPhone()+"'";
 
-
-
         if (employee.getImage() !=null) {
             query += ",image=?  where id ="+employee.getId();
             preparedStatement = connection.prepareStatement(query);
-            fis = convertImageToInputStream(employee.getImage());
+            fis = InputStreamConverter.convertFileToInputStream(employee.getImage());
 
             preparedStatement.setBinaryStream(1, fis, (int) employee.getImage().length());
         }
@@ -110,7 +82,8 @@ public class DataBase {
         return true;
     }
 
-    public void deleteInformation(String id) throws SQLException {
+    @Override
+    public void deleteById(String id) throws SQLException {
         String query = "DELETE FROM employee where id = " + id;
 
         preparedStatement = connection.prepareStatement(query);
