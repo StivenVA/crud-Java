@@ -34,11 +34,18 @@ public class EmployeesRepository implements EmployeeRepository {
         preparedStatement.setString(5, employee.getDirection());
         preparedStatement.setString(6, employee.getPhone());
         preparedStatement.setDate(7, (Date) employee.getBirthdate());
-        FileInputStream fis = new FileInputStream(employee.getImage());
-        preparedStatement.setBinaryStream(8, fis, (int) employee.getImage().length());
+        try{
+            FileInputStream fis = new FileInputStream(employee.getImage());
+            preparedStatement.setBinaryStream(8, fis, (int) employee.getImage().length());
 
-        fis =employee.getVideo() == null? null: new FileInputStream(employee.getVideo());
-        preparedStatement.setBinaryStream(9, fis, employee.getVideo() == null? 0: (int) employee.getVideo().length());
+            fis =employee.getVideo() == null? null: new FileInputStream(employee.getVideo());
+            preparedStatement.setBinaryStream(9, fis, employee.getVideo() == null? 0: (int) employee.getVideo().length());
+
+        }
+        catch (FileNotFoundException e){
+            preparedStatement.setBinaryStream(8, null, 0);
+            preparedStatement.setBinaryStream(9, null, 0);
+        }
 
         preparedStatement.executeUpdate();
     }
