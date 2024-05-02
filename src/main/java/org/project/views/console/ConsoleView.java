@@ -1,30 +1,32 @@
-package org.project.fachada.views.console;
+package org.project.views.console;
 
-import org.project.util.EmployeeMapper;
+import org.project.fachada.ApplicationFachada;
+import org.project.interfaces.observer.Observable;
 import org.project.util.components.CameraComponent;
 import org.project.dto.EmployeeDTO;
-import org.project.interfaces.Observer;
-import org.project.config.dbconfig.repository.EmployeesRepository;
+import org.project.interfaces.observer.Observer;
 
 import java.io.File;
 import java.sql.Date;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
-public class ConsoleView implements Runnable, Observer {
+public class ConsoleView implements Runnable, Observer, Observable {
     private final Scanner in;
-    private final EmployeesRepository employeesRepository;
     private final Thread thread;
     private EmployeeDTO employeeDTOForUpdate;
     private boolean isUpdate;
+    private final ApplicationFachada applicationFachada;
+    private final List<Observer> observers;
 
     public ConsoleView() {
         in = new Scanner(System.in);
-        employeesRepository = new EmployeesRepository("mysql");
         CameraComponent cameraComponent = CameraComponent.getCameraComponent();
         cameraComponent.registryObserver(this);
         thread = new Thread(cameraComponent);
+        applicationFachada = ApplicationFachada.getInstance();
+        observers = new ArrayList<>();
     }
 
     @Override
@@ -59,49 +61,31 @@ public class ConsoleView implements Runnable, Observer {
                     break;
             }
         }
-        while (option >3 || option < 1);
+        while (option!=4);
     }
 
     private void createUser() {
-
-        try {
-            employeesRepository.save(EmployeeMapper.toEmployee(createEmployee()));
-            System.out.println("User created succesfully");
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        employeeDTOForUpdate = createEmployee();
+        applicationFachada.saveEmployee(employeeDTOForUpdate);
+        notifyObservers();
+        System.out.println("User created succesfully");
     }
 
     private void updateUser(){
         employeeDTOForUpdate = new EmployeeDTO();
-        ResultSet resultSet;
         boolean exist;
         isUpdate = true;
         in.nextLine();
-        try {
             do{
                 System.out.println("Enter the user id: ");
                 String id = in.nextLine();
-                resultSet = employeesRepository.findById(id);
+                employeeDTOForUpdate = applicationFachada.findById(id);
 
-                exist = resultSet.next();
+                exist = employeeDTOForUpdate != null;
                 if (!exist)
                     System.out.println("\nPlease enter a valid id");
 
             }while (!exist);
-
-            employeeDTOForUpdate.setUpdateImage(resultSet.getBinaryStream("image"));
-            employeeDTOForUpdate.setId(resultSet.getString("id"));
-            employeeDTOForUpdate.setName(resultSet.getString("name"));
-            employeeDTOForUpdate.setLastName(resultSet.getString("last_name"));
-            employeeDTOForUpdate.setEmail(resultSet.getString("email"));
-            employeeDTOForUpdate.setDirection(resultSet.getString("direction"));
-            employeeDTOForUpdate.setPhone(resultSet.getString("phone"));
-            employeeDTOForUpdate.setBirthdate(resultSet.getDate("birthdate"));
-
-        }catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
 
         System.out.println("Select what you want to update: ");
 
@@ -120,26 +104,31 @@ public class ConsoleView implements Runnable, Observer {
         switch (option) {
             case 1:
                 System.out.println("Enter the new name: ");
+                in.nextLine();
                 employeeDTOForUpdate.setName(in.nextLine());
                 update();
                 break;
             case 2:
                 System.out.println("Enter the new last name: ");
+                in.nextLine();
                 employeeDTOForUpdate.setLastName(in.nextLine());
                 update();
                 break;
             case 3:
                 System.out.println("Enter the new email: ");
+                in.nextLine();
                 employeeDTOForUpdate.setEmail(in.nextLine());
                 update();
                 break;
             case 4:
                 System.out.println("Enter the new direction: ");
+                in.nextLine();
                 employeeDTOForUpdate.setDirection(in.nextLine());
                 update();
                 break;
             case 5:
                 System.out.println("Enter the new phone: ");
+                in.nextLine();
                 employeeDTOForUpdate.setPhone(in.nextLine());
                 update();
                 break;
@@ -149,22 +138,29 @@ public class ConsoleView implements Runnable, Observer {
                 break;
             case 7:
                 System.out.println("Enter the new birthdate: ");
+                in.nextLine();
                 employeeDTOForUpdate.setBirthdate(Date.valueOf(in.nextLine()));
                 update();
                 break;
             case 8:
                 isUpdate = true;
                 System.out.println("Enter the new name: ");
+                in.nextLine();
                 employeeDTOForUpdate.setName(in.nextLine());
                 System.out.println("Enter the new last name: ");
+                in.nextLine();
                 employeeDTOForUpdate.setLastName(in.nextLine());
                 System.out.println("Enter the new email: ");
+                in.nextLine();
                 employeeDTOForUpdate.setEmail(in.nextLine());
                 System.out.println("Enter the new direction: ");
+                in.nextLine();
                 employeeDTOForUpdate.setDirection(in.nextLine());
                 System.out.println("Enter the new phone: ");
+                in.nextLine();
                 employeeDTOForUpdate.setPhone(in.nextLine());
                 System.out.println("Enter the new birthdate: ");
+                in.nextLine();
                 employeeDTOForUpdate.setBirthdate(Date.valueOf(in.nextLine()));
                 System.out.println("Enter the new image: ");
                 thread.start();
@@ -178,11 +174,8 @@ public class ConsoleView implements Runnable, Observer {
     }
 
     public void update(){
-        try {
-            employeesRepository.update(EmployeeMapper.toEmployee(employeeDTOForUpdate));
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        applicationFachada.updateEmployee(employeeDTOForUpdate);
+        notifyObservers();
     }
 
     public EmployeeDTO createEmployee(){
@@ -209,30 +202,30 @@ public class ConsoleView implements Runnable, Observer {
 
     public void deleteUser(){
         System.out.println("Enter the user id: ");
-        try {
-            employeesRepository.deleteById(in.nextLine());
-            System.out.println("User deleted succesfully");
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        in.nextLine();
+        String id = in.nextLine();
+        employeeDTOForUpdate = new EmployeeDTO();
+        employeeDTOForUpdate.setId(id);
+        notifyObservers();
+        applicationFachada.deleteEmployee(id);
+        System.out.println("User deleted succesfully");
+
     }
 
     @Override
-    public void notify(File imageFile) {
+    public void notify(EmployeeDTO  employeeDTO) {
         if (!isUpdate) return;
 
-        try {
-            if(employeeDTOForUpdate.getId()!=null){
-                employeeDTOForUpdate.setImage(imageFile);
-
-                employeesRepository.update(EmployeeMapper.toEmployee(employeeDTOForUpdate));
-                System.out.println("User updated succesfully");
-                isUpdate = false;
-            }
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        if (employeeDTOForUpdate.getId() == null) {
+            return;
         }
+        employeeDTOForUpdate.setImage(employeeDTO.getImage());
+
+        applicationFachada.updateEmployee(employeeDTOForUpdate);
+        notifyObservers();
+
+        System.out.println("User updated succesfully");
+        isUpdate = false;
     }
 
     public void iniciar(){
@@ -240,4 +233,13 @@ public class ConsoleView implements Runnable, Observer {
         threadConsole.start();
     }
 
+    @Override
+    public void registryObserver(Observer observer) {
+        observers.add(observer);
+    }
+
+    @Override
+    public void notifyObservers() {
+        observers.forEach(observer -> observer.notify(employeeDTOForUpdate));
+    }
 }

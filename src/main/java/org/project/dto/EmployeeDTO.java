@@ -10,6 +10,7 @@ public class EmployeeDTO {
     private Date birthdate;
 
     private File image;
+    private File video;
 
     public EmployeeDTO(){
 
@@ -85,5 +86,13 @@ public class EmployeeDTO {
 
     public void setBirthdate(Date birthdate) {
         this.birthdate = birthdate;
+    }
+
+    public void setVideo(File video){
+        this.video = video;
+    }
+
+    public File getVideo(){
+        return this.video;
     }
 }

@@ -16,8 +16,10 @@ public class InputStreamConverter {
         try {
             return new FileInputStream(image);
         } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
+
+        return null;
     }
 
     public static File inputStreamToFile(InputStream inputStream) {

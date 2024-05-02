@@ -8,6 +8,8 @@ import org.project.util.InputStreamConverter;
 
 import java.io.*;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class EmployeesRepository implements EmployeeRepository {
 
@@ -23,7 +25,7 @@ public class EmployeesRepository implements EmployeeRepository {
 
     @Override
     public void save(Employee employee) throws Exception{
-        String query = "INSERT INTO employee VALUES (?,?,?,?,?,?,?,?)";
+        String query = "INSERT INTO employee VALUES (?,?,?,?,?,?,?,?,?)";
         preparedStatement = connection.prepareStatement(query);
         preparedStatement.setInt(1, Integer.parseInt(employee.getId()));
         preparedStatement.setString(2, employee.getName());
@@ -35,19 +37,22 @@ public class EmployeesRepository implements EmployeeRepository {
         FileInputStream fis = new FileInputStream(employee.getImage());
         preparedStatement.setBinaryStream(8, fis, (int) employee.getImage().length());
 
+        fis =employee.getVideo() == null? null: new FileInputStream(employee.getVideo());
+        preparedStatement.setBinaryStream(9, fis, employee.getVideo() == null? 0: (int) employee.getVideo().length());
+
         preparedStatement.executeUpdate();
     }
 
     @Override
-    public ResultSet findById(String identification) throws SQLException {
+    public Employee findById(String identification) throws SQLException {
         String query = "SELECT * FROM employee WHERE id = ?";
         preparedStatement = connection.prepareStatement(query);
         preparedStatement.setInt(1, Integer.parseInt(identification));
-        return preparedStatement.executeQuery();
+        ResultSet resultSet = preparedStatement.executeQuery();
+        resultSet.next();
+        return createEmployee(resultSet);
 
     }
-
-
 
     @Override
     public boolean update(Employee employee) throws SQLException {
@@ -90,4 +95,49 @@ public class EmployeesRepository implements EmployeeRepository {
         preparedStatement.executeUpdate();
     }
 
+    @Override
+    public List<Employee> findAll() {
+
+        List<Employee> employees;
+
+        try {
+            String query = "SELECT * FROM employee";
+            preparedStatement = connection.prepareStatement(query);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            employees = new ArrayList<>();
+            while (resultSet.next()) {
+                Employee employee = createEmployee(resultSet);
+                employees.add(employee);
+            }
+            return employees;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return List.of();
+    }
+
+    private Employee createEmployee(ResultSet resultSet) throws SQLException {
+        Employee employee = new Employee();
+        employee.setId(resultSet.getString("id"));
+        employee.setName(resultSet.getString("name"));
+        employee.setLastName(resultSet.getString("last_name"));
+        employee.setEmail(resultSet.getString("email"));
+        employee.setDirection(resultSet.getString("direction"));
+        employee.setPhone(resultSet.getString("phone"));
+        employee.setBirthdate(resultSet.getDate("birthdate"));
+
+        InputStream inputStream = resultSet.getBinaryStream("image");
+        if (inputStream!=null) {
+            File image = InputStreamConverter.inputStreamToFile(inputStream);
+            employee.setImage(image);
+        }
+        inputStream = resultSet.getBinaryStream("video");
+        if (inputStream!=null) {
+            File video = InputStreamConverter.inputStreamToFile(inputStream);
+            employee.setVideo(video);
+        }
+
+        return employee;
+    }
 }

@@ -2,8 +2,9 @@ package org.project.util.components;
 
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_videoio.VideoCapture;
-import org.project.interfaces.Observable;
-import org.project.interfaces.Observer;
+import org.project.dto.EmployeeDTO;
+import org.project.interfaces.observer.Observable;
+import org.project.interfaces.observer.Observer;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -185,8 +186,11 @@ public class CameraComponent extends  JFrame implements Runnable, Observable {
     @Override
     public void notifyObservers() {
 
+        EmployeeDTO employeeDTO = new EmployeeDTO();
+        employeeDTO.setImage(selectedImage);
+
         for (Observer observer : observers){
-            observer.notify(selectedImage);
+            observer.notify(employeeDTO);
         }
 
     }

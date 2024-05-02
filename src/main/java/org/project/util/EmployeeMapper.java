@@ -14,6 +14,8 @@ public class EmployeeMapper {
         employeeDTO.setDirection(employee.getDirection());
         employeeDTO.setPhone(employee.getPhone());
         employeeDTO.setBirthdate(employee.getBirthdate());
+        employeeDTO.setImage(employee.getImage());
+        employeeDTO.setVideo(employee.getVideo());
 
         return employeeDTO;
     }
@@ -28,9 +30,9 @@ public class EmployeeMapper {
         employee.setDirection(employeeDTO.getDirection());
         employee.setPhone(employeeDTO.getPhone());
         employee.setBirthdate(employeeDTO.getBirthdate());
+        employee.setVideo(employeeDTO.getVideo());
 
         if (employeeDTO.getUpdateImage() !=null) {
-            System.out.println("Entró aquí");
             employee.setImage(InputStreamConverter.inputStreamToFile(employeeDTO.getUpdateImage()));
         }
         else{

@@ -1,7 +1,11 @@
 package org.project.entity;
 
+import org.project.config.dbconfig.repository.EmployeesRepository;
+import org.project.interfaces.repository.EmployeeRepository;
+
 import java.io.File;
 import java.util.Date;
+import java.util.List;
 
 public class Employee {
 
@@ -9,9 +13,48 @@ public class Employee {
     private Date birthdate;
 
     private File image;
+    private File video;
 
-    public Employee(){
+    private static final EmployeeRepository employeeRepository = new EmployeesRepository("mysql");
 
+    public static void save(Employee employee){
+        try {
+            employeeRepository.save(employee);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void delete(String id){
+        try {
+            employeeRepository.deleteById(id);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void update(Employee employee){
+        try {
+            employeeRepository.update(employee);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static Employee findById(String id){
+        try {
+            return employeeRepository.findById(id);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static List<Employee> findAll(){
+        try {
+            return employeeRepository.findAll();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public String getId() {
@@ -76,5 +119,13 @@ public class Employee {
 
     public void setBirthdate(Date birthdate) {
         this.birthdate = birthdate;
+    }
+
+    public File getVideo() {
+        return video;
+    }
+
+    public void setVideo(File video) {
+        this.video = video;
     }
 }
