@@ -1,5 +1,6 @@
 package org.project.dto;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Date;
@@ -8,7 +9,6 @@ public class EmployeeDTO {
     private InputStream updateImage;
     private String id, name, lastName, email, direction, phone;
     private Date birthdate;
-
     private File image;
     private File video;
 

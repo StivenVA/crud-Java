@@ -5,6 +5,7 @@ import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.javacv.*;
 import org.bytedeco.javacv.Frame;
 import org.project.dto.EmployeeDTO;
+import org.project.fachada.ApplicationFachada;
 import org.project.interfaces.observer.Observable;
 import org.project.interfaces.observer.Observer;
 
@@ -17,8 +18,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class VideoRecorderGUIWithIntegratedPreview implements Observable {
-    private static final String OUTPUT_FILE_PATH = System.getProperty("user.home") + "\\Documents\\videos"; // Ruta del archivo de salida
+public class VideoRecorderGUIWithIntegratedPreview implements Observable { // Ruta del archivo de salida
     private static final int CAPTURE_WIDTH = 640;
     private static final int CAPTURE_HEIGHT = 480;
     private static final int FRAMES_PER_SECOND = 20;
@@ -32,12 +32,6 @@ public class VideoRecorderGUIWithIntegratedPreview implements Observable {
     }
 
     public void iniciarCapturaVideo(String idUsuario) {
-
-        File file = new File(OUTPUT_FILE_PATH);
-
-        if (!file.exists()) {
-            file.mkdirs();
-        }
 
         JFrame frame = new JFrame("Video Recorder");
         frame.setSize(800, 600);
@@ -99,7 +93,7 @@ public class VideoRecorderGUIWithIntegratedPreview implements Observable {
                 grabber.start();
 
                 // Crear el archivo de salida y asignarlo a la variable
-                videoFile = new File(OUTPUT_FILE_PATH+"\\video_usuario_"+idUsuario+".mp4");
+                videoFile = new File(System.getProperty("user.home")+"\\video_usuario_"+idUsuario+".mp4");
 
                 FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(videoFile, CAPTURE_WIDTH, CAPTURE_HEIGHT);
                 recorder.setFormat("mp4");
@@ -118,6 +112,7 @@ public class VideoRecorderGUIWithIntegratedPreview implements Observable {
 
                 recorder.stop();
                 grabber.stop();
+
             } catch (Exception e) {
                 e.printStackTrace();
             }

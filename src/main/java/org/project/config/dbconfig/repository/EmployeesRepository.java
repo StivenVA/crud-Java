@@ -5,13 +5,17 @@ import org.project.dto.EmployeeDTO;
 import org.project.entity.Employee;
 import org.project.interfaces.repository.EmployeeRepository;
 import org.project.util.InputStreamConverter;
+import org.project.util.ManagerStorage;
 
 import java.io.*;
+import java.nio.file.NoSuchFileException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class EmployeesRepository implements EmployeeRepository {
+
+    private static final String OUTPUT_FILE_PATH = System.getProperty("user.home") + "\\Documents\\videos";
 
     Connection connection;
     PreparedStatement preparedStatement;
@@ -21,6 +25,11 @@ public class EmployeesRepository implements EmployeeRepository {
             connection = DatabaseConnectionFactory.getInstance().createConnection(motor);
         } catch (SQLException ignored) {
         }
+    }
+
+    public void saveVideoLocal(File video){
+        ManagerStorage managerStorage = new ManagerStorage(OUTPUT_FILE_PATH);
+        managerStorage.saveFile(video);
     }
 
     @Override

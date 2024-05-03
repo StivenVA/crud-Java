@@ -254,6 +254,9 @@ public class HomeScreen extends JFrame implements Observer, Observable {
                 }
                 employeeDTOForNotify = createEmployee();
 
+                if(employeeDTOForNotify.getVideo()!=null)
+                    applicationFachada.saveVideoLocal(employeeDTOForNotify.getVideo());
+
                 applicationFachada.saveEmployee(employeeDTOForNotify);
                 notifyObservers();
                 setAddPaneBlankFields();

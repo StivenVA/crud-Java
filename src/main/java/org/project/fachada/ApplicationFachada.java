@@ -3,7 +3,9 @@ package org.project.fachada;
 import org.project.dto.EmployeeDTO;
 import org.project.entity.Employee;
 import org.project.util.EmployeeMapper;
+import org.project.util.InputStreamConverter;
 
+import java.io.File;
 import java.util.List;
 
 
@@ -40,5 +42,9 @@ public class ApplicationFachada {
 
     public List<EmployeeDTO> findAll(){
         return Employee.findAll().stream().map(EmployeeMapper::toEmployeeDTO).toList();
+    }
+
+    public void saveVideoLocal(File video){
+        Employee.saveVideoLocal(video);
     }
 }
