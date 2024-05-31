@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menú con HTML, CSS y JavaScript</title>
+
+    <!-- CUSTOM CSS -->
+    <link rel="stylesheet" th:href="@{css/styles.css}">
+</head>
+<body>
+
+<nav class="menu">
+    <ul>
+        <li><a href="#" id="listar-imagenes">Listar Imágenes</a></li>
+        <li><a href="#" id="listar-videos">Listar Videos</a></li>
+        <li><a href="#" id="crear-empleado">Crear Empleado</a></li>
+    </ul>
+</nav>
+
+<div id="content">
+    <h1 id="title"></h1>
+</div>
+
+<script th:src="@{js/index.js}"></script>
+</body>
+</html>

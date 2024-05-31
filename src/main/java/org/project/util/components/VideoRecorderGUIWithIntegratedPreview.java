@@ -4,10 +4,9 @@ import org.bytedeco.ffmpeg.global.avcodec;
 import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.javacv.*;
 import org.bytedeco.javacv.Frame;
-import org.project.dto.EmployeeDTO;
-import org.project.fachada.ApplicationFachada;
-import org.project.interfaces.observer.Observable;
-import org.project.interfaces.observer.Observer;
+import org.project.desktop.dto.EmployeeDTO;
+import org.project.desktop.interfaces.observer.Observable;
+import org.project.desktop.interfaces.observer.Observer;
 
 import javax.swing.*;
 import java.awt.*;

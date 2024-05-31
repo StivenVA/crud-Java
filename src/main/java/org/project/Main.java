@@ -1,24 +1,29 @@
 package org.project;
 
+import org.project.desktop.views.UsersTable;
+import org.project.desktop.views.console.ConsoleView;
+import org.project.desktop.views.gui.HomeScreen;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import org.project.views.UsersTable;
-import org.project.views.console.ConsoleView;
-import org.project.views.gui.HomeScreen;
-
-
+@SpringBootApplication
 public class Main {
     public static void main(String[] args) {
-        ConsoleView consoleView= new ConsoleView();
-        consoleView.iniciar();
 
-        HomeScreen homeScreen = new HomeScreen();
-        homeScreen.iniciar();
+            ConsoleView consoleView= new ConsoleView();
+            consoleView.iniciar();
 
-        UsersTable usersTable = new UsersTable();
-        usersTable.iniciar();
+            HomeScreen homeScreen = new HomeScreen();
+            homeScreen.iniciar();
 
-        homeScreen.registryObserver(usersTable);
-        consoleView.registryObserver(usersTable);
+            UsersTable usersTable = new UsersTable();
+            usersTable.iniciar();
+
+            homeScreen.registryObserver(usersTable);
+            consoleView.registryObserver(usersTable);
+
+            SpringApplication.run(Main.class, args);
+
     }
 
 }

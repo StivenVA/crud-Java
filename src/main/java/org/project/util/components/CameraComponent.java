@@ -2,9 +2,9 @@ package org.project.util.components;
 
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_videoio.VideoCapture;
-import org.project.dto.EmployeeDTO;
-import org.project.interfaces.observer.Observable;
-import org.project.interfaces.observer.Observer;
+import org.project.desktop.dto.EmployeeDTO;
+import org.project.desktop.interfaces.observer.Observable;
+import org.project.desktop.interfaces.observer.Observer;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;

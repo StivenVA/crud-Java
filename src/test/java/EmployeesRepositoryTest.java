@@ -1,7 +1,7 @@
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.project.config.dbconfig.repository.EmployeesRepository;
-import org.project.entity.Employee;
+import org.project.desktop.dbconfig.repository.EmployeesRepository;
+import org.project.desktop.entity.Employee;
 
 import java.io.File;
 import java.sql.SQLException;

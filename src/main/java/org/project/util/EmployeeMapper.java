@@ -1,7 +1,7 @@
 package org.project.util;
 
-import org.project.dto.EmployeeDTO;
-import org.project.entity.Employee;
+import org.project.desktop.dto.EmployeeDTO;
+import org.project.desktop.entity.Employee;
 
 public class EmployeeMapper {
     public static EmployeeDTO toEmployeeDTO(Employee employee) {
