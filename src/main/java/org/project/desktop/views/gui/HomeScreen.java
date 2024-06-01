@@ -252,13 +252,16 @@ public class HomeScreen extends JFrame implements Observer, Observable {
                 }
                 employeeDTOForNotify = createEmployee();
 
-                if(employeeDTOForNotify.getVideo()!=null)
-                    applicationFachada.saveVideoLocal(employeeDTOForNotify.getVideo());
+                if(employeeDTOForNotify.getVideo()!=null){
+                    employeeDTOForNotify.setVideo(applicationFachada.saveVideoLocal(employeeDTOForNotify.getVideo()));
+                }
 
+                System.out.println(employeeDTOForNotify.getImage());
+                System.out.println(employeeDTOForNotify.getVideo());
                 applicationFachada.saveEmployee(employeeDTOForNotify);
                 notifyObservers();
                 setAddPaneBlankFields();
-
+                employeeDTOForNotify = null;
             } else showModal("Complete todos los campos",false);
     }
 
@@ -274,8 +277,11 @@ public class HomeScreen extends JFrame implements Observer, Observable {
         employeeDTO.setName(nameTxt.getText());
         employeeDTO.setImage(selectedImage);
 
-        if (captureVideo!=null)
+        if (captureVideo!=null){
             employeeDTO.setVideo(captureVideo);
+            captureVideo= null;
+        }
+
 
         return employeeDTO;
     }

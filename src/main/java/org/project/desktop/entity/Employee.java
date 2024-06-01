@@ -17,8 +17,8 @@ public class Employee {
 
     private static final EmployeeRepository employeeRepository = new EmployeesRepository("mysql");
 
-    public static void saveVideoLocal(File video){
-        ((EmployeesRepository) employeeRepository).saveVideoLocal(video);
+    public static File saveVideoLocal(File video){
+        return ((EmployeesRepository) employeeRepository).saveVideoLocal(video);
     }
 
     public static void save(Employee employee){

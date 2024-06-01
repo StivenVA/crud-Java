@@ -1,0 +1,6 @@
+projectKey=parcialTecnologias
+serverUrl=http://localhost:9000
+serverVersion=10.5.1.90531
+dashboardUrl=http://localhost:9000/dashboard?id=parcialTecnologias
+ceTaskId=fdc0f2a6-8e8b-4360-a46a-d75280c11a9b
+ceTaskUrl=http://localhost:9000/api/ce/task?id=fdc0f2a6-8e8b-4360-a46a-d75280c11a9b

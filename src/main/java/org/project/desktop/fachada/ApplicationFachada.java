@@ -43,7 +43,7 @@ public class ApplicationFachada {
         return Employee.findAll().stream().map(EmployeeMapper::toEmployeeDTO).toList();
     }
 
-    public void saveVideoLocal(File video){
-        Employee.saveVideoLocal(video);
+    public File saveVideoLocal(File video){
+         return Employee.saveVideoLocal(video);
     }
 }

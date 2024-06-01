@@ -25,9 +25,9 @@ public class EmployeesRepository implements EmployeeRepository {
         }
     }
 
-    public void saveVideoLocal(File video){
+    public File saveVideoLocal(File video){
         ManagerStorage managerStorage = new ManagerStorage(OUTPUT_FILE_PATH);
-        managerStorage.saveFile(video);
+        return managerStorage.saveFile(video);
     }
 
     @Override
@@ -41,16 +41,26 @@ public class EmployeesRepository implements EmployeeRepository {
         preparedStatement.setString(5, employee.getDirection());
         preparedStatement.setString(6, employee.getPhone());
         preparedStatement.setDate(7, (Date) employee.getBirthdate());
-        try{
+
+        try {
+            System.out.println(employee.getImage() +"desde repository");
             FileInputStream fis = new FileInputStream(employee.getImage());
             preparedStatement.setBinaryStream(8, fis, (int) employee.getImage().length());
 
-            fis =employee.getVideo() == null? null: new FileInputStream(employee.getVideo());
+        }catch (FileNotFoundException e){
+            System.out.println("No se encontro el archivo");
+            preparedStatement.setBinaryStream(8, null, 0);
+        }
+
+        try{
+            FileInputStream fis;
+            System.out.println(employee.getVideo() +"desde repository");
+            fis = employee.getVideo() == null? null: new FileInputStream(employee.getVideo());
             preparedStatement.setBinaryStream(9, fis, employee.getVideo() == null? 0: (int) employee.getVideo().length());
 
         }
         catch (FileNotFoundException e){
-            preparedStatement.setBinaryStream(8, null, 0);
+            System.out.println("No se encontro el archivo");
             preparedStatement.setBinaryStream(9, null, 0);
         }
 

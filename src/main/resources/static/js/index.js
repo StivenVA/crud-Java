@@ -30,16 +30,15 @@
 
            const url = URL.createObjectURL(blob);
            console.log(url);
-           window.open(url, '_blank');
 
            const contentDiv = document.getElementById("content");
            contentDiv.innerHTML = `
-                <h1>Video</h1>
-                <video width="640" height="480" controls>
-                    <source src="${url}" type="video/mp4">
-                    Tu navegador no soporta el elemento de video.
-                </video>
-            `;
+            <h1>Video</h1>
+            <video width="640" height="480" controls>
+                <source src="${url}" type="video/mp4">
+                Tu navegador no soporta el elemento de video.
+            </video>
+        `;
        } catch (error) {
            console.error('Error al obtener el video:', error);
        }

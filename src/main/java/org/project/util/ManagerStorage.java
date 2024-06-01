@@ -14,7 +14,7 @@ public class ManagerStorage {
         this.directory = new File(path);
     }
 
-    public void saveFile(File file) {
+    public File saveFile(File file) {
         Path directoryPath = Paths.get(this.directory.getPath());
         System.out.println("Directorio: " + directoryPath); // Imprimir la ruta del directorio
         System.out.println("Archivo: "+file.getPath());
@@ -22,6 +22,7 @@ public class ManagerStorage {
             Files.createDirectories(directoryPath); // Crear directorio si no existe
             Path destination = directoryPath.resolve(file.getName());
             Files.move(file.toPath(), destination);
+            return destination.toFile();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
