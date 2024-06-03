@@ -13,7 +13,7 @@ public class MySQLConnection {
     public static Connection getConnection() throws SQLException {
 
         if (connection == null)
-            connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/empleados", "root", "root");
+            connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/employee", "root", "root");
 
         return connection;
     }

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.sql.Timestamp;
 import java.util.Date;
 
 @Entity
@@ -25,4 +26,7 @@ public class Employee {
     private byte[] image;
     @Lob
     private byte[] video;
+
+    @Column(name = "created_at")
+    private Timestamp createdAt;
 }

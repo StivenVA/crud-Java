@@ -1,15 +1,10 @@
 package org.project.spring.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.project.spring.entity.Employee;
 import org.project.spring.service.EmployeeService;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequestMapping("/employees")
 @RequiredArgsConstructor
@@ -20,15 +15,12 @@ public class EmployeeController {
     @GetMapping
     public ResponseEntity<?> findAll(){
 
-        byte[] videoData = employeeService.findById(10).getVideo();
+        return ResponseEntity.ok(employeeService.findAll());
+    }
 
-        ByteArrayResource resource = new ByteArrayResource(videoData);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.parseMediaType("video/mp4"));
-        headers.setContentDispositionFormData("attachment", "video.mp4");
-
-        return new ResponseEntity<>(resource, headers, HttpStatus.OK);
+    @PostMapping
+    public ResponseEntity<?> save(@RequestBody Employee employee){
+        return ResponseEntity.ok(employeeService.save(employee));
     }
 
 }

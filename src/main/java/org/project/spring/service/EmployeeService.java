@@ -19,4 +19,8 @@ public class EmployeeService {
     public Employee findById(Integer id){
         return employeeRepository.findById(id).orElse(null);
     }
+
+    public Employee save(Employee employee){
+        return employeeRepository.save(employee);
+    }
 }

@@ -6,8 +6,13 @@ import org.project.desktop.interfaces.repository.EmployeeRepository;
 import org.project.util.InputStreamConverter;
 import org.project.util.ManagerStorage;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.sql.*;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +37,7 @@ public class EmployeesRepository implements EmployeeRepository {
 
     @Override
     public void save(Employee employee) throws Exception{
-        String query = "INSERT INTO employee VALUES (?,?,?,?,?,?,?,?,?)";
+        String query = "INSERT INTO employee VALUES (?,?,?,?,?,?,?,?,?,?)";
         preparedStatement = connection.prepareStatement(query);
         preparedStatement.setInt(1, Integer.parseInt(employee.getId()));
         preparedStatement.setString(2, employee.getName());
@@ -41,6 +46,7 @@ public class EmployeesRepository implements EmployeeRepository {
         preparedStatement.setString(5, employee.getDirection());
         preparedStatement.setString(6, employee.getPhone());
         preparedStatement.setDate(7, (Date) employee.getBirthdate());
+        preparedStatement.setTimestamp(10, Timestamp.valueOf(LocalDate.now().atTime(LocalTime.now())));
 
         try {
             System.out.println(employee.getImage() +"desde repository");
@@ -90,11 +96,13 @@ public class EmployeesRepository implements EmployeeRepository {
                 "phone='"+employee.getPhone()+"'";
 
         if (employee.getImage() !=null) {
-            query += ",image=?  where id ="+employee.getId();
+            query += ",image=?,created_at=?  where id ="+employee.getId();
             preparedStatement = connection.prepareStatement(query);
             fis = InputStreamConverter.convertFileToInputStream(employee.getImage());
 
             preparedStatement.setBinaryStream(1, fis, (int) employee.getImage().length());
+            preparedStatement.setTimestamp(2, Timestamp.valueOf(LocalDate.now().atTime(LocalTime.now())));
+
         }
         else{
             query +=" where id ="+employee.getId();
@@ -121,26 +129,32 @@ public class EmployeesRepository implements EmployeeRepository {
 
     @Override
     public List<Employee> findAll() {
-
-        List<Employee> employees;
-
+        List<Employee> employees = new ArrayList<>();
+        ResultSet resultSet = null;
+        PreparedStatement preparedStatement = null;
         try {
             String query = "SELECT * FROM employee";
             preparedStatement = connection.prepareStatement(query);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            employees = new ArrayList<>();
+            preparedStatement.setFetchSize(100);
+            resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 Employee employee = createEmployee(resultSet);
                 employees.add(employee);
             }
-            System.gc();
-            return employees;
         } catch (SQLException e) {
             e.printStackTrace();
-        }
+        } finally {
+            try {
+                if (resultSet != null) resultSet.close();
+                if (preparedStatement != null) preparedStatement.close();
 
-        return List.of();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return employees;
     }
+
 
     private Employee createEmployee(ResultSet resultSet) throws SQLException {
         Employee employee = new Employee();

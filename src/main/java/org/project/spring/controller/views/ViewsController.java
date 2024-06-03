@@ -17,4 +17,14 @@ public class ViewsController {
     public String index(){
         return "index";
     }
+
+    @GetMapping("/imagenes")
+    public String imagenes(){
+        return "imagenes";
+    }
+
+    @GetMapping("usuarios")
+    public String usuarios(){
+        return "usuarios";
+    }
 }

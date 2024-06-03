@@ -1,23 +1,9 @@
-   document.getElementById("listar-imagenes").addEventListener("click", function(event) {
-        event.preventDefault();
-        mostrarContenido("Listar Imágenes", "Aquí se mostrarán las imágenes.");
-    });
 
-   document.getElementById("listar-videos").addEventListener("click", function(event) {
+   document.getElementById("listar-videos").addEventListener("click", async function(event) {
        event.preventDefault();
-       mostrarContenido("Listar Videos", "Aquí se mostrarán los videos.");
-       mostrarVideo(); // Suponiendo que el ID del video es 1
+       await mostrarVideo(); // Suponiendo que el ID del video es 1
    });
 
-    document.getElementById("crear-empleado").addEventListener("click", function(event) {
-        event.preventDefault();
-        mostrarContenido("Crear Empleado", "Formulario para crear un nuevo empleado.");
-    });
-
-    function mostrarContenido(titulo, contenido) {
-        document.getElementById("title").innerText = titulo;
-
-    }
 
    async function mostrarVideo() {
        try {
@@ -25,22 +11,27 @@
            if (!response.ok) {
                throw new Error('Error al obtener el video');
            }
-           const blob = await response.blob();
-           console.log(blob);
 
-           const url = URL.createObjectURL(blob);
-           console.log(url);
+           // Suponiendo que el videoData.video contiene los datos del video en base64
+           const videoDTO = await response.json();
+           const videoData = videoDTO.video;
+
+           // Crear una URL de datos a partir de los datos en base64
+           const videoSrc = `data:video/mp4;base64,${videoData}`;
 
            const contentDiv = document.getElementById("content");
-           contentDiv.innerHTML = `
-            <h1>Video</h1>
-            <video width="640" height="480" controls>
-                <source src="${url}" type="video/mp4">
-                Tu navegador no soporta el elemento de video.
-            </video>
-        `;
+
+           const video = document.createElement('video');
+           video.width = 640;
+           video.height = 480;
+           video.controls = true;
+           video.src = videoSrc;
+
+           contentDiv.appendChild(video);
        } catch (error) {
            console.error('Error al obtener el video:', error);
        }
    }
+
+
 
